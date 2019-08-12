@@ -19,6 +19,7 @@ void printMenu()
   std::cout << "(C)lear filters\n";
   std::cout << "Print the (F)ilters\n";
   std::cout << "Print (R)esults\n";
+  std::cout << "Monster (L)ookup\n";
   std::cout << "Print the (M)enu\n";
   std::cout << "(Q)uit the program\n";
 }
@@ -38,6 +39,7 @@ void addFilter(search terms[])
     case 'N':
       std::cout << "Name selected. Enter the filter.\n>> ";
       std::cin >> terms[0].text;
+      std::cout << terms[0].text << " name filter added.\n";
       terms[0].active = true;
       std::transform(terms[0].text.begin(), terms[0].text.end(),
                      terms[0].text.begin(), ::tolower);
@@ -91,13 +93,12 @@ void addFilter(search terms[])
           std::cout << "No option chosen. No filters applied.\n";
           break;
       }
-      std::transform(terms[2].text.begin(), terms[2].text.end(),
-                     terms[2].text.begin(), ::tolower);
       break;
     case 't':
     case 'T':
       std::cout << "Enter the type of the monster.\n>> ";
       std::cin >> terms[1].text;
+      std::cout << terms[1].text << " type filter added.\n";
       terms[1].active = true;
       std::transform(terms[1].text.begin(), terms[1].text.end(),
                      terms[1].text.begin(), ::tolower);
@@ -223,9 +224,31 @@ void printResults(search filter[],
   printList.sort();
   printList.unique();
 
+  std::cout << printList.size() << " results.\n";
   for (auto& x : printList)
     std::cout << x.getName() << std::endl;
   
+}
+
+void monsterLookup(std::unordered_map<std::string, std::list<Monster> > NameMap)
+{
+  std::string name;
+  Monster monster;
+
+  std::cout << "Enter the full name of the monster:\n>> ";
+  std::cin >> name;
+
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+  monster = NameMap[name].front();
+
+  if (NameMap[name].size() > 1)
+    std::cout << "Not full name of monster. Returning to main menu.\n";
+  else if (NameMap[name].size() == 1)
+  {
+    std::cout << monster.getName() << std::endl;
+    std::cout << monster.getSize() << ' ' << monster.getType();
+    std::cout << ", " << monster.getAlignment() << std::endl;
+  }
 }
 
 int main()
@@ -372,6 +395,10 @@ int main()
       case 'r':
       case 'R':
         printResults(filters, NameMap, SizeMap, TypeMap);
+        break;
+      case 'l':
+      case 'L':
+        monsterLookup(NameMap);
         break;
       default:
         std::cout << "No valid menu option selected. Try again.\n";

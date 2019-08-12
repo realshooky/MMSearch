@@ -3,13 +3,21 @@
 #include <cctype>
 #include <unordered_map>
 #include <list>
+#include <vector>
 #include "Monster.hpp"
 
 struct search
 {
-  bool active = false;
-  std::string text = "";
-  int num = -1;
+  bool active;
+  std::string text;
+  int num;
+
+  search(std::string t = "", int n = -1, bool a = false)
+  {
+    active = a;
+    text = t;
+    num = n;
+  }
 };
 
 void printMenu()
@@ -18,6 +26,7 @@ void printMenu()
   std::cout << "(A)dd a filter\n";
   std::cout << "(C)lear filters\n";
   std::cout << "Print the (F)ilters\n";
+  std::cout << "Add result (S)orting options\n";
   std::cout << "Print (R)esults\n";
   std::cout << "Monster (L)ookup\n";
   std::cout << "Print the (M)enu\n";
@@ -33,12 +42,13 @@ void addFilter(search terms[])
   char choice;
   std::cout << ">> ";
   std::cin >> choice;
+  std::cin.ignore();
   switch(choice)
   {
     case 'n':
     case 'N':
       std::cout << "Name selected. Enter the filter.\n>> ";
-      std::cin >> terms[0].text;
+      std::getline(std::cin, terms[0].text);
       std::cout << terms[0].text << " name filter added.\n";
       terms[0].active = true;
       std::transform(terms[0].text.begin(), terms[0].text.end(),
@@ -97,7 +107,7 @@ void addFilter(search terms[])
     case 't':
     case 'T':
       std::cout << "Enter the type of the monster.\n>> ";
-      std::cin >> terms[1].text;
+      std::getline(std::cin, terms[1].text);
       std::cout << terms[1].text << " type filter added.\n";
       terms[1].active = true;
       std::transform(terms[1].text.begin(), terms[1].text.end(),
@@ -123,15 +133,26 @@ void clearFilters(search filters[])
   }
 }
 
-void printResults(search filter[],
-                  std::unordered_map<std::string, std::list<Monster>> NameMap,
-                  std::unordered_map<std::string, std::list<Monster>> SizeMap,
-                  std::unordered_map<std::string, std::list<Monster>> TypeMap)
+bool compareHP(const Monster& lhs, const Monster& rhs)
+{
+  return lhs.getHP() < rhs.getHP();
+}
+
+bool compareCR(const Monster& lhs, const Monster& rhs)
+{
+  return lhs.getCR() < rhs.getCR();
+}
+
+void printResults(search filter[], char sortOp, std::unordered_map<std::string, std::list<Monster>> Maps[])
+                  // NameMap,
+                  // SizeMap,
+                  // TypeMap)
 {
   std::list<Monster> printList;
   if (filter[0].active)
   {
-    for (auto& x : NameMap[filter[0].text])
+    // NameMap
+    for (auto& x : Maps[0][filter[0].text])
     {
       // all 3 filters
       if (filter[1].active && filter[2].active)
@@ -160,7 +181,8 @@ void printResults(search filter[],
   }
   else if (filter[1].active)
   {
-    for (auto &x : TypeMap[filter[1].text])
+    // TypeMap
+    for (auto &x : Maps[1][filter[1].text])
     {
       // all filters
       if (filter[0].active && filter[2].active)
@@ -189,7 +211,8 @@ void printResults(search filter[],
   }
   else if (filter[2].active)
   {
-    for (auto &x : SizeMap[filter[2].text])
+    // SizeMap
+    for (auto &x : Maps[2][filter[2].text])
     {
       if (filter[1].active && filter[0].active)
       {
@@ -214,7 +237,7 @@ void printResults(search filter[],
   }
   else
   {
-    for (auto& x : NameMap)
+    for (auto& x : Maps[0])
       for (auto&y : x.second)
       {
         printList.push_back(y);
@@ -223,6 +246,22 @@ void printResults(search filter[],
 
   printList.sort();
   printList.unique();
+
+  if (sortOp == 'A')
+  {
+    std::vector<std::list <Monster> > ACvector(25);
+    for (auto& x : printList)
+    {
+      ACvector[x.getAC() - 5].push_back(x);
+    }
+
+    printList.clear();
+
+    for (auto& x : ACvector)
+      printList.splice(printList.end(), x);
+  }
+  else if (sortOp == 'H') printList.sort(compareHP);
+  else if (sortOp == 'C') printList.sort(compareCR);
 
   std::cout << printList.size() << " results.\n";
   for (auto& x : printList)
@@ -236,7 +275,8 @@ void monsterLookup(std::unordered_map<std::string, std::list<Monster> > NameMap)
   Monster monster;
 
   std::cout << "Enter the full name of the monster:\n>> ";
-  std::cin >> name;
+  std::cin.ignore();
+  std::getline(std::cin, name);
 
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
   monster = NameMap[name].front();
@@ -248,7 +288,42 @@ void monsterLookup(std::unordered_map<std::string, std::list<Monster> > NameMap)
     std::cout << monster.getName() << std::endl;
     std::cout << monster.getSize() << ' ' << monster.getType();
     std::cout << ", " << monster.getAlignment() << std::endl;
+    std::cout << "Hit Points: " << monster.getHP() << ' ' 
+              << monster.getHP_Dice() << std::endl;
+    std::cout << "Armor Class: " << monster.getAC() << ' '
+              << monster.getArmors() << std::endl;
+    std::cout << "Speed: " << monster.getSpeeds() << std::endl;
+    std::cout << "CR: " << monster.getCR() << " ("
+              << monster.getXP() << " XP)" << std::endl;
   }
+}
+
+char sortOption()
+{
+  char option;
+  int num;
+  std::cout << "Sort results by:\n";
+  std::cout << "(C)hallenge Rating\n";
+  std::cout << "(H)ealth Points\n";
+  std::cout << "(A)rmor Class\n";
+  std::cin >> option;
+  switch(option)
+  {
+    case 'c':
+    case 'C':
+      std::cout << "Sorting by CR.\n";
+      return 'C';
+    case 'h':
+    case 'H':
+      std::cout << "Sorting by HP.\n";
+      return 'H';
+    case 'a':
+    case 'A':
+      std::cout << "Sorting by AC.\n";
+      return 'A';
+    default:
+      return '\0';
+  } 
 }
 
 int main()
@@ -353,14 +428,23 @@ int main()
       NameMap[sub].push_back(monster);
     }
 
-    TypeMap[monster.getType()].push_back(monster);
+    next = monster.getType();
+    for (int i = 0; i < strlen(monster.getType()); i++)
+    {
+      sub = next.substr(0, i+1);
+      TypeMap[sub].push_back(monster);
+    }
+
     SizeMap[monster.getSize()].push_back(monster);
   };
 
   std::cout << "Welcome to the Monster Manual Search Engine!" << std::endl;
   printMenu();
-  char menuChoice;
+  int sortVal = 0;
+  char menuChoice = '\0', sortOp = '\0';
   bool loop = true;
+  std::unordered_map<std::string, std::list<Monster>> maps[] = {NameMap, SizeMap, TypeMap};
+
   while (loop)
   {
     std::cout << ">> ";
@@ -394,11 +478,15 @@ int main()
         break;
       case 'r':
       case 'R':
-        printResults(filters, NameMap, SizeMap, TypeMap);
+        printResults(filters, sortOp, maps);
         break;
       case 'l':
       case 'L':
         monsterLookup(NameMap);
+        break;
+      case 's':
+      case 'S':
+        sortOp = sortOption();
         break;
       default:
         std::cout << "No valid menu option selected. Try again.\n";

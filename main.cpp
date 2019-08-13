@@ -338,47 +338,54 @@ int main()
   search filters[3];
 
   std::fstream file;
-  file.open("monster-manual.txt", std::fstream::in);
+  file.open("monster-manualv3.txt", std::fstream::in);
 
   Monster monster;
   std::string str;
   int x;
 
   int j = 0;
-  while(++j < 325)
+  while(++j < 325) // 324 entries in monster manual
   {
     if (file.peek() == '\n')
       file.ignore();
     std::getline(file, str);
     monster.setName(str);
+   // std::cout << monster.getName() << std::endl;
     
     file >> str;
     monster.setSize(str);
+    std::cout << monster.getSize() << std::endl;
 
     file.ignore();
     std::getline(file, str, ',');
     monster.setType(str);
+   // std::cout << monster.getType() << std::endl;
 
     file.ignore();
     std::getline(file, str);
     monster.setAlignment(str);
+   // std::cout << monster.getAlignment() << std::endl;
 
     // ignoring "Hit Points:"
     file.ignore(12, ':');
 
     file >> x;
     monster.setHP(x);
+    //std::cout << monster.getHP() << std::endl;
 
     file.ignore();
     if (file.peek() == '(')
       std::getline(file, str);
     else str.clear();
     monster.setHP_Dice(str);
+   // std::cout << monster.getHP_Dice() << std::endl;
 
     std::getline(file, str, ':');
 
     file >> x;
     monster.setAC(x);
+   // std::cout << monster.getAC() << std::endl;
 
     file.ignore();
     if (file.peek() == '(')
@@ -391,21 +398,21 @@ int main()
       char empty[] = {""};
       monster.setArmors(empty);
     }
+    //std::cout << monster.getArmors() << std::endl;
     
-    file.ignore(8);
+    file.ignore(7);
 
     std::getline(file, str);
     monster.setSpeeds(str);
+    //std::cout << monster.getSpeeds() << std::endl;
 
-    // junk
-    file.ignore(128, '\n');
-
-    // junk
-    std::getline(file, str, '\n');
+    // ignoring "Challenge Rating:"
+    file.ignore(128, ':');
 
     double CRval;
     file >> CRval;
     monster.setCR(CRval);
+    //std::cout << monster.getCR() << std::endl;
 
     file.ignore(2, '(');
 
@@ -414,8 +421,10 @@ int main()
       if (str[i] == ',') str.erase(i, i);
     x = std::stoi(str);
     monster.setXP(x);
+    //std::cout << monster.getXP() << std::endl;
 
     file.ignore(5, ')');
+    file.ignore();
 
     std::string sub, next = monster.getName();
 

@@ -27,6 +27,7 @@ void printMenu()
   std::cout << "(C)lear filters\n";
   std::cout << "Print the (F)ilters\n";
   std::cout << "Add result (S)orting options\n";
+  std::cout << "Clear sorting (O)ptions\n";
   std::cout << "Print (R)esults\n";
   std::cout << "Monster (L)ookup\n";
   std::cout << "Print the (M)enu\n";
@@ -127,12 +128,52 @@ void printFilters(search filters[])
 
 void clearFilters(search filters[])
 {
-  for (int i = 0; i < 3; i++)
+  char choice;
+  std::cout << "Clear all filters? (y/n)\n>> ";
+  std::cin >> choice;
+  if (choice == 'y' || choice == 'Y')
   {
-    filters[i].active = false;
-    filters[i].num = -1;
-    filters[i].text = "";
+    for (int i = 0; i < 3; i++)
+    {
+      filters[i].active = false;
+      filters[i].num = -1;
+      filters[i].text = "";
+    }
   }
+  else if (choice == 'n' || choice == 'N')
+  {
+    std::cout << "Clear which filter?\n";
+    std::cout << "(N)ame\n(S)ize\n(T)ype\n>> ";
+    std::cin >> choice;
+    switch(choice)
+    {
+      case 'n':
+      case 'N':
+        filters[0].active = false;
+        filters[0].num = -1;
+        filters[0].text = "";
+        break;
+      case 's':
+      case 'S':
+        filters[1].active = false;
+        filters[1].num = -1;
+        filters[1].text = "";
+        break;
+      case 't':
+      case 'T':
+        filters[2].active = false;
+        filters[2].num = -1;
+        filters[2].text = "";
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+void clearSortOp(char& sortOp)
+{
+  sortOp = '\0';
 }
 
 bool compareHP(const Monster& lhs, const Monster& rhs)
@@ -502,6 +543,24 @@ int main()
       case 's':
       case 'S':
         sortOp = sortOption();
+        break;
+      case 'o':
+      case 'O':
+        if (sortOp == '\0')
+        {
+          std::cout << "No sort option selected.\n";
+        }
+        else
+        {
+          std::cout << "Clearing sort op: ";
+          if (sortOp == 'A')
+            std::cout << "AC\n";
+          else if (sortOp == 'H')
+            std::cout << "HP\n";
+          else if (sortOp == 'C')
+            std::cout << "CR\n";
+          clearSortOp(sortOp);
+        }
         break;
       default:
         std::cout << "No valid menu option selected. Try again.\n";

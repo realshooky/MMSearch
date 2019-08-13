@@ -15,9 +15,9 @@ Currently Implemented Features:
 Adding and clearing search filters
 Adding results sorting options
 Monster Lookup
+Clearing individual filters
+Clearing results sorting options
 
 Future Features:
 ----------------
-Clearing individual filters
-Clearing results sorting options
 More robust lookup information

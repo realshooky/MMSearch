@@ -355,7 +355,7 @@ int main()
     
     file >> str;
     monster.setSize(str);
-    std::cout << monster.getSize() << std::endl;
+    //std::cout << monster.getSize() << std::endl;
 
     file.ignore();
     std::getline(file, str, ',');

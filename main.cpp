@@ -65,39 +65,39 @@ void addFilter(search terms[])
       {
         case 't':
         case 'T':
-          terms[2].text = "Tiny";
-          terms[2].active = true;
-          std::cout << terms[2].text + " selected." << '\n';
+          terms[1].text = "Tiny";
+          terms[1].active = true;
+          std::cout << terms[1].text + " selected." << '\n';
           break;
         case 's':
         case 'S':
-          terms[2].text = "Small";
-          terms[2].active = true;
-          std::cout << terms[2].text + " selected." << '\n';
+          terms[1].text = "Small";
+          terms[1].active = true;
+          std::cout << terms[1].text + " selected." << '\n';
           break;
         case 'm':
         case 'M':
-          terms[2].text = "Medium";
-          terms[2].active = true;
-          std::cout << terms[2].text + " selected." << '\n';
+          terms[1].text = "Medium";
+          terms[1].active = true;
+          std::cout << terms[1].text + " selected." << '\n';
           break;
         case 'l':
         case 'L':
-          terms[2].text = "Large";
-          terms[2].active = true;
-          std::cout << terms[2].text + " selected." << '\n';
+          terms[1].text = "Large";
+          terms[1].active = true;
+          std::cout << terms[1].text + " selected." << '\n';
           break;
         case 'h':
         case 'H':
-          terms[2].text = "Huge";
-          terms[2].active = true;
-          std::cout << terms[2].text + " selected." << '\n';
+          terms[1].text = "Huge";
+          terms[1].active = true;
+          std::cout << terms[1].text + " selected." << '\n';
           break;
         case 'g':
         case 'G':
-          terms[2].text = "Gargantuan";
-          terms[2].active = true;
-          std::cout << terms[2].text + " selected." << '\n';
+          terms[1].text = "Gargantuan";
+          terms[1].active = true;
+          std::cout << terms[1].text + " selected." << '\n';
           break;
         default:
           std::cout << "No option chosen. No filters applied.\n";
@@ -107,11 +107,11 @@ void addFilter(search terms[])
     case 't':
     case 'T':
       std::cout << "Enter the type of the monster.\n>> ";
-      std::getline(std::cin, terms[1].text);
-      std::cout << terms[1].text << " type filter added.\n";
-      terms[1].active = true;
-      std::transform(terms[1].text.begin(), terms[1].text.end(),
-                     terms[1].text.begin(), ::tolower);
+      std::getline(std::cin, terms[2].text);
+      std::cout << terms[2].text << " type filter added.\n";
+      terms[2].active = true;
+      std::transform(terms[2].text.begin(), terms[2].text.end(),
+                     terms[2].text.begin(), ::tolower);
       break;
   }
 }
@@ -119,8 +119,10 @@ void addFilter(search terms[])
 void printFilters(search filters[])
 {
   if (filters[0].active) std::cout << "Name filter: " << filters[0].text << std::endl;
-  if (filters[1].active) std::cout << "Type filter: " << filters[1].text << std::endl;
-  if (filters[2].active) std::cout << "Size filter: " << filters[2].text << std::endl;
+  if (filters[1].active) std::cout << "Size filter: " << filters[1].text << std::endl;
+  if (filters[2].active) std::cout << "Type filter: " << filters[2].text << std::endl;
+  else if (!filters[0].active && !filters[1].active && !filters[2].active)
+    std::cout << "No active filters.\n";
 }
 
 void clearFilters(search filters[])
@@ -157,19 +159,27 @@ void printResults(search filter[], char sortOp, std::unordered_map<std::string, 
       // all 3 filters
       if (filter[1].active && filter[2].active)
       {
-        if (x.getType() == filter[1].text && x.getSize() == filter[2].text)
-          printList.push_back(x);
+        for (auto& y : Maps[1][filter[1].text])
+        {
+          if (y.getNameString() == x.getNameString())
+          {
+            for (auto& z : Maps[2][filter[2].text])
+              if (z.getNameString() == y.getNameString())
+                printList.push_back(x);
+          }
+        }
       }
       // name and size filter
       else if (!filter[1].active && filter[2].active)
       {
-        if (x.getType() != filter[1].text && x.getSize() == filter[2].text)
-          printList.push_back(x);
+        for (auto& y : Maps[2][filter[2].text])
+          if (y.getNameString() == x.getNameString())
+            printList.push_back(x);
       }
       // name and type filter
       else if (filter[1].active && !filter[2].active)
       {
-        if (x.getType() == filter[1].text && x.getSize() != filter[2].text)
+        if (x.getType() != filter[2].text && x.getSize() == filter[1].text)
           printList.push_back(x);
       }
       // name only
@@ -181,28 +191,29 @@ void printResults(search filter[], char sortOp, std::unordered_map<std::string, 
   }
   else if (filter[1].active)
   {
-    // TypeMap
+    // SizeMap
+    if (Maps[1][filter[1].text].empty()) std::cout << "empty\n"; 
     for (auto &x : Maps[1][filter[1].text])
     {
       // all filters
       if (filter[0].active && filter[2].active)
       {
-        if (x.getType() == filter[0].text && x.getSize() == filter[2].text)
+        if (x.getSize() == filter[0].text && x.getType() == filter[2].text)
           printList.push_back(x);
       }
-      // type and size filter
+      // size and type filter
       else if (!filter[0].active && filter[2].active)
       {
-        if (x.getType() != filter[0].text && x.getSize() == filter[2].text)
+        if (x.getSize() != filter[0].text && x.getType() == filter[2].text)
           printList.push_back(x);
       }
-      // name and type filter
+      // size and name filter
       else if (filter[0].active && !filter[2].active)
       {
-        if (x.getType() == filter[1].text && x.getSize() != filter[2].text)
+        if (x.getSize() == filter[0].text && x.getType() != filter[2].text)
           printList.push_back(x);
       }
-      // type filter
+      // size filter
       else if (!filter[0].active && !filter[2].active)
       {
         printList.push_back(x);
@@ -211,22 +222,22 @@ void printResults(search filter[], char sortOp, std::unordered_map<std::string, 
   }
   else if (filter[2].active)
   {
-    // SizeMap
+    // TypeMap
     for (auto &x : Maps[2][filter[2].text])
     {
       if (filter[1].active && filter[0].active)
       {
-        if (x.getType() == filter[1].text && x.getSize() == filter[0].text)
+        if (x.getSize() == filter[1].text && x.getName() == filter[0].text)
           printList.push_back(x);
       }
       else if (!filter[1].active && filter[0].active)
       {
-        if (x.getType() != filter[1].text && x.getSize() == filter[0].text)
+        if (x.getSize() != filter[1].text && x.getName() == filter[0].text)
           printList.push_back(x);
       }
       else if (filter[1].active && !filter[0].active)
       {
-        if (x.getType() == filter[1].text && x.getSize() != filter[0].text)
+        if (x.getSize() == filter[1].text && x.getName() != filter[0].text)
           printList.push_back(x);
       }
       else if (!filter[1].active && !filter[0].active)

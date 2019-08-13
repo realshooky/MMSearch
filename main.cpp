@@ -150,110 +150,91 @@ void printResults(search filter[], char sortOp, std::unordered_map<std::string, 
                   // SizeMap,
                   // TypeMap)
 {
-  std::list<Monster> printList;
-  if (filter[0].active)
-  {
-    // NameMap
-    for (auto& x : Maps[0][filter[0].text])
+    std::list<Monster> printList;
+    if (filter[0].active)
     {
-      // all 3 filters
-      if (filter[1].active && filter[2].active)
+      // NameMap
+      for (auto& x : Maps[0][filter[0].text])
       {
-        for (auto& y : Maps[1][filter[1].text])
+        // all 3 filters
+        if (filter[1].active && filter[2].active)
         {
-          if (y.getNameString() == x.getNameString())
+          for (auto& y : Maps[1][filter[1].text])
           {
-            for (auto& z : Maps[2][filter[2].text])
-              if (z.getNameString() == y.getNameString())
-                printList.push_back(x);
+            if (y.getNameString() == x.getNameString())
+            {
+              for (auto& z : Maps[2][filter[2].text])
+                if (z.getNameString() == y.getNameString())
+                  printList.push_back(x);
+            }
           }
         }
-      }
-      // name and size filter
-      else if (!filter[1].active && filter[2].active)
-      {
-        for (auto& y : Maps[2][filter[2].text])
-          if (y.getNameString() == x.getNameString())
-            printList.push_back(x);
-      }
-      // name and type filter
-      else if (filter[1].active && !filter[2].active)
-      {
-        if (x.getType() != filter[2].text && x.getSize() == filter[1].text)
+        // name and size filter
+        else if (!filter[1].active && filter[2].active)
+        {
+          for (auto& y : Maps[2][filter[2].text])
+            if (y.getNameString() == x.getNameString())
+              printList.push_back(x);
+        }
+        // name and type filter
+        else if (filter[1].active && !filter[2].active)
+        {
+          for (auto &y : Maps[1][filter[1].text])
+            if (y.getNameString() == x.getNameString())
+              printList.push_back(x);
+        }
+        // name only
+        else if (!filter[1].active && !filter[2].active)
+        {
           printList.push_back(x);
-      }
-      // name only
-      else if (!filter[1].active && !filter[2].active)
-      {
-        printList.push_back(x);
+        }
       }
     }
-  }
-  else if (filter[1].active)
-  {
-    // SizeMap
-    if (Maps[1][filter[1].text].empty()) std::cout << "empty\n"; 
-    for (auto &x : Maps[1][filter[1].text])
+    else if (filter[1].active)
     {
-      // all filters
-      if (filter[0].active && filter[2].active)
+      // SizeMap
+      if (Maps[1][filter[1].text].empty()) std::cout << "empty\n"; 
+      for (auto &x : Maps[1][filter[1].text])
       {
-        if (x.getSize() == filter[0].text && x.getType() == filter[2].text)
+        // size and type filter
+        if (!filter[0].active && filter[2].active)
+        {
+          for (auto &y : Maps[2][filter[2].text])
+            if (y.getNameString() == x.getNameString())
+              printList.push_back(x);
+        }
+        // size and name filter
+        else if (filter[0].active && !filter[2].active)
+        {
+          for (auto &y : Maps[0][filter[0].text])
+            if (y.getNameString() == x.getNameString())
+              printList.push_back(x);
+        }
+        // size filter
+        else if (!filter[0].active && !filter[2].active)
+        {
           printList.push_back(x);
-      }
-      // size and type filter
-      else if (!filter[0].active && filter[2].active)
-      {
-        if (x.getSize() != filter[0].text && x.getType() == filter[2].text)
-          printList.push_back(x);
-      }
-      // size and name filter
-      else if (filter[0].active && !filter[2].active)
-      {
-        if (x.getSize() == filter[0].text && x.getType() != filter[2].text)
-          printList.push_back(x);
-      }
-      // size filter
-      else if (!filter[0].active && !filter[2].active)
-      {
-        printList.push_back(x);
+        }
       }
     }
-  }
-  else if (filter[2].active)
-  {
-    // TypeMap
-    for (auto &x : Maps[2][filter[2].text])
+    else if (filter[2].active)
     {
-      if (filter[1].active && filter[0].active)
+      if (!filter[1].active && !filter[0].active)
       {
-        if (x.getSize() == filter[1].text && x.getName() == filter[0].text)
+        for (auto& x : Maps[2][filter[2].text])
           printList.push_back(x);
-      }
-      else if (!filter[1].active && filter[0].active)
-      {
-        if (x.getSize() != filter[1].text && x.getName() == filter[0].text)
-          printList.push_back(x);
-      }
-      else if (filter[1].active && !filter[0].active)
-      {
-        if (x.getSize() == filter[1].text && x.getName() != filter[0].text)
-          printList.push_back(x);
-      }
-      else if (!filter[1].active && !filter[0].active)
-      {
-        printList.push_back(x);
       }
     }
-  }
-  else
-  {
-    for (auto& x : Maps[0])
-      for (auto&y : x.second)
-      {
-        printList.push_back(y);
-      }
-  }
+
+    if (!filter[0].active && !filter[1].active && !filter[2].active)
+    {
+      for (auto& x : Maps[0])
+        for (auto&y : x.second)
+        {
+          printList.push_back(y);
+        }
+    }
+  
 
   printList.sort();
   printList.unique();
@@ -290,23 +271,31 @@ void monsterLookup(std::unordered_map<std::string, std::list<Monster> > NameMap)
   std::getline(std::cin, name);
 
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-  monster = NameMap[name].front();
-
-  if (NameMap[name].size() > 1)
-    std::cout << "Not full name of monster. Returning to main menu.\n";
-  else if (NameMap[name].size() == 1)
+  if (NameMap.find(name) != NameMap.end())
   {
-    std::cout << monster.getName() << std::endl;
-    std::cout << monster.getSize() << ' ' << monster.getType();
-    std::cout << ", " << monster.getAlignment() << std::endl;
-    std::cout << "Hit Points: " << monster.getHP() << ' ' 
-              << monster.getHP_Dice() << std::endl;
-    std::cout << "Armor Class: " << monster.getAC() << ' '
-              << monster.getArmors() << std::endl;
-    std::cout << "Speed: " << monster.getSpeeds() << std::endl;
-    std::cout << "CR: " << monster.getCR() << " ("
-              << monster.getXP() << " XP)" << std::endl;
+    monster = NameMap[name].front();
+
+    if (NameMap[name].size() > 1)
+      std::cout << "Not full name of monster. Returning to main menu.\n";
+    else if (NameMap[name].size() == 1)
+    {
+      std::cout << monster.getName() << std::endl;
+      std::cout << monster.getSize() << ' ' << monster.getType();
+      std::cout << ", " << monster.getAlignment() << std::endl;
+      std::cout << "Hit Points: " << monster.getHP() << ' ' 
+                << monster.getHP_Dice() << std::endl;
+      std::cout << "Armor Class: " << monster.getAC() << ' '
+                << monster.getArmors() << std::endl;
+      std::cout << "Speed: " << monster.getSpeeds() << std::endl;
+      std::cout << "CR: " << monster.getCR() << " ("
+                << monster.getXP() << " XP)" << std::endl;
+    }
   }
+  else
+  {
+    std::cout << "Monster does not exist in the Monster Manual.\n";
+  }
+  
 }
 
 char sortOption()

@@ -12,12 +12,12 @@ and the original version ripped straight from the roll20.net repository is calle
 
 Currently Implemented Features:
 -------------------------------
-*Adding and clearing search filters
-*Adding results sorting options
-*Monster Lookup
-*Clearing individual filters
-*Clearing results sorting options
+* Adding and clearing search filters
+* Adding results sorting options
+* Monster Lookup
+* Clearing individual filters
+* Clearing results sorting options
 
 Future Features:
 ----------------
-More robust lookup information
+* More robust lookup information

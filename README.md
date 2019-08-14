@@ -21,3 +21,4 @@ Currently Implemented Features:
 Future Features:
 ----------------
 * More robust lookup information
+* Ascending and descending ordering for sort options

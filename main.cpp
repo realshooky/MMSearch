@@ -3,6 +3,8 @@
 #include <cctype>
 #include <unordered_map>
 #include <list>
+#include <algorithm>
+#include <cstring>
 #include <vector>
 #include "Monster.hpp"
 

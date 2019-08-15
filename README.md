@@ -17,8 +17,8 @@ Currently Implemented Features:
 * Monster Lookup
 * Clearing individual filters
 * Clearing results sorting options
+* Ascending and descending ordering for sort options
 
 Future Features:
 ----------------
 * More robust lookup information
-* Ascending and descending ordering for sort options

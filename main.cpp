@@ -5,7 +5,6 @@
 #include <list>
 #include <algorithm>
 #include <cstring>
-#include <vector>
 #include "Monster.hpp"
 
 struct search
@@ -175,7 +174,42 @@ void clearFilters(search filters[])
 
 void clearSortOp(char& sortOp)
 {
+  switch(sortOp)
+  {
+    case 'A':
+      std::cout << "Clearing AC Ascending sort option.\n";
+      break;
+    case 'B':
+      std::cout << "Clearing AC Descending sort option.\n";
+      break;
+    case 'C':
+      std::cout << "Clearing CR Ascending sort option.\n";
+      break;
+    case 'D':
+      std::cout << "Clearing CR Descending sort option.\n";
+      break;
+    case 'H':
+      std::cout << "Clearing HP Ascending sort option.\n";
+      break;
+    case 'I':
+      std::cout << "Clearing HP Descending sort option.\n";    
+  }
   sortOp = '\0';
+}
+
+bool compareNameAscend(const Monster& lhs, const Monster& rhs)
+{
+  return lhs.getNameString() > rhs.getNameString();
+}
+
+bool compareAC(const Monster& lhs, const Monster& rhs)
+{
+  return lhs.getAC() < rhs.getAC();
+}
+
+bool compareACAscend(const Monster& lhs, const Monster& rhs)
+{
+  return lhs.getAC() > rhs.getAC();
 }
 
 bool compareHP(const Monster& lhs, const Monster& rhs)
@@ -183,9 +217,19 @@ bool compareHP(const Monster& lhs, const Monster& rhs)
   return lhs.getHP() < rhs.getHP();
 }
 
+bool compareHPAscend(const Monster& lhs, const Monster& rhs)
+{
+  return lhs.getHP() > rhs.getHP();
+}
+
 bool compareCR(const Monster& lhs, const Monster& rhs)
 {
   return lhs.getCR() < rhs.getCR();
+}
+
+bool compareCRAscend(const Monster& lhs, const Monster& rhs)
+{
+  return lhs.getCR() > rhs.getCR();
 }
 
 void printResults(search filter[], char sortOp, std::unordered_map<std::string, std::list<Monster>> Maps[])
@@ -236,7 +280,6 @@ void printResults(search filter[], char sortOp, std::unordered_map<std::string, 
     else if (filter[1].active)
     {
       // SizeMap
-      if (Maps[1][filter[1].text].empty()) std::cout << "empty\n"; 
       for (auto &x : Maps[1][filter[1].text])
       {
         // size and type filter
@@ -282,32 +325,23 @@ void printResults(search filter[], char sortOp, std::unordered_map<std::string, 
   printList.sort();
   printList.unique();
 
-  if (sortOp == 'A')
-  {
-    std::vector<std::list <Monster> > ACvector(25);
-    for (auto& x : printList)
-    {
-      ACvector[x.getAC() - 5].push_back(x);
-    }
-
-    printList.clear();
-
-    for (auto& x : ACvector)
-      printList.splice(printList.end(), x);
-  }
+  if (sortOp == 'A') printList.sort(compareAC);
+  else if (sortOp == 'B') printList.sort(compareACAscend);
   else if (sortOp == 'H') printList.sort(compareHP);
+  else if (sortOp == 'I') printList.sort(compareHPAscend);
   else if (sortOp == 'C') printList.sort(compareCR);
+  else if (sortOp == 'D') printList.sort(compareCRAscend);
+  else if (sortOp == 'N') printList.sort(compareNameAscend);
 
   std::cout << printList.size() << " results.\n";
   for (auto& x : printList)
   {
     std::cout << x.getName();
-    if (sortOp == 'A') std::cout << " AC: " << x.getAC() << std::endl;
-    else if (sortOp == 'H') std::cout << " HP: " << x.getHP() << std::endl;
-    else if (sortOp == 'C') std::cout << " CR: " << x.getCR() << std::endl;
+    if (sortOp == 'A' || sortOp == 'B') std::cout << " \\ AC: " << x.getAC() << std::endl;
+    else if (sortOp == 'H' || sortOp == 'I') std::cout << " \\ HP: " << x.getHP() << std::endl;
+    else if (sortOp == 'C' || sortOp == 'D') std::cout << " \\ CR: " << x.getCR() << std::endl;
     else std::cout << std::endl;
-  }
-  
+  }  
 }
 
 void monsterLookup(std::unordered_map<std::string, std::list<Monster> > NameMap)
@@ -349,30 +383,49 @@ void monsterLookup(std::unordered_map<std::string, std::list<Monster> > NameMap)
 
 char sortOption()
 {
-  char option;
+  char option, ret;
   int num;
   std::cout << "Sort results by:\n";
   std::cout << "(C)hallenge Rating\n";
   std::cout << "(H)ealth Points\n";
-  std::cout << "(A)rmor Class\n>> ";
+  std::cout << "(A)rmor Class\n";
+  std::cout << "(N)ame\n>> ";
   std::cin >> option;
   switch(option)
   {
     case 'c':
     case 'C':
       std::cout << "Sorting by CR.\n";
-      return 'C';
+      ret = 'C';
+      break;
     case 'h':
     case 'H':
       std::cout << "Sorting by HP.\n";
-      return 'H';
+      ret = 'H';
+      break;
     case 'a':
     case 'A':
       std::cout << "Sorting by AC.\n";
-      return 'A';
+      ret = 'A';
+      break;
+    case 'n':
+    case 'N':
+      std::cout << "Sorting by Name.\n";
+      ret = 'N';
+      break;
     default:
+      std::cout << "No option selected, returning to main menu.\n";
       return '\0';
-  } 
+  }
+  std::cout << "(A)scending or (D)escending?\n>> ";
+  std::cin >> option;
+  if (option == 'd' || option == 'D')
+  {
+    if (ret == 'N') return '\0';
+    return ret + 1;
+  }
+
+  return ret;
 }
 
 int main()
@@ -511,7 +564,6 @@ int main()
     {
       case 'a':
       case 'A':
-        std::cout << "Adding a filter\n";
         addFilter(filters);
         break;
       case 'f':
@@ -530,9 +582,9 @@ int main()
         break;
       case 'c':
       case 'C':
-        std::cout << "Clearing search results:\n";
+        std::cout << "Active filters:\n";
         printFilters(filters);
-        clearFilters(filters);
+        if (filters[0].active || filters[1].active || filters[2].active) clearFilters(filters);
         break;
       case 'r':
       case 'R':
@@ -554,13 +606,6 @@ int main()
         }
         else
         {
-          std::cout << "Clearing sort op: ";
-          if (sortOp == 'A')
-            std::cout << "AC\n";
-          else if (sortOp == 'H')
-            std::cout << "HP\n";
-          else if (sortOp == 'C')
-            std::cout << "CR\n";
           clearSortOp(sortOp);
         }
         break;
